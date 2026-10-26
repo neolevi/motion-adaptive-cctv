@@ -1,12 +1,35 @@
+```gitignore
+# Python virtual environment
 venv/
-__pycache__/
-*.pyc
-.env
+.venv/
 
-# footage and generated data: never commit these
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Secrets and environment variables
+.env
+.env.*
+!.env.example
+
+# CCTV footage and generated data
 data/
 recordings/
 *.mp4
 *.avi
+*.mov
+*.mkv
 *.db
 *.sqlite
+*.sqlite3
+
+# Logs
+*.log
+
+# Generated reports and exports
+reports/generated/
+
+# Model weights
+*.pt
+*.onnx
+```
