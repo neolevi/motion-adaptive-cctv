@@ -1,4 +1,7 @@
-import cv2, time
+import cv2
+import time
+from adaptive_sampler import AdaptiveSampler
+from activity_logger import log_activity
 
 cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 subtractor = cv2.createBackgroundSubtractorMOG2(history=500, varThreshold=25, detectShadows=True)
@@ -8,7 +11,9 @@ COOLDOWN = 10            # seconds of stillness before ACTIVE -> IDLE
 DEEP_IDLE_AFTER = 30     # use 30 sec for testing; change to 1800 (30 min) later
 
 state = "idle"
-last_motion = time.time()
+last_motion = time.monotonic()
+sampler = AdaptiveSampler()
+saved_frames = 0
 
 while True:
     ok, frame = cap.read()
@@ -22,7 +27,7 @@ while True:
     changed = cv2.countNonZero(mask)
     motion = changed > MOTION_PIXELS
 
-    now = time.time()
+    now = time.monotonic()
     prev = state
     if motion:
         last_motion, state = now, "active"
@@ -31,8 +36,22 @@ while True:
     elif state == "idle" and now - last_motion > DEEP_IDLE_AFTER:
         state = "deep_idle"
 
-    if state != prev:
-        print(time.strftime("%H:%M:%S"), prev, "->", state)
+    if sampler.should_save(state, now):
+        saved_frames += 1
+
+        filename = f"frame_{saved_frames:06d}_{state}.jpg"
+        filepath = f"data/frames/{filename}"
+
+        if cv2.imwrite(filepath, frame):
+            log_activity(state, filename)
+            print(
+                f"{time.strftime('%H:%M:%S')} | "
+                f"Saved frame #{saved_frames} | "
+                f"State: {state} | "
+                f"File: {filename}"
+            )
+        else:
+            print(f"ERROR: Could not save {filepath}")
 
     cv2.putText(frame, f"{state.upper()}  changed={changed}", (10, 30),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)

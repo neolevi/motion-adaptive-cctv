@@ -33,3 +33,5 @@ reports/generated/
 *.pt
 *.onnx
 ```
+# Generated daily summaries
+reports/

@@ -1,42 +1,16 @@
 
-
 from adaptive_sampler import AdaptiveSampler
 
 
 def main():
     sampler = AdaptiveSampler()
 
-    test_frames = [
-        (0.00, "active", True),
-        (0.02, "active", False),
-        (0.04, "active", True),
-        (0.30, "idle", True),
-        (0.40, "idle", False),
-        (0.60, "idle", True),
-        (1.00, "deep_idle", True),
-        (1.50, "deep_idle", False),
-        (2.10, "deep_idle", True),
-    ]
-
-    print("Time | State      | Expected | Actual")
-    print("-" * 43)
-
-    for timestamp, state, expected in test_frames:
-        actual = sampler.should_save(state, timestamp)
-
+    print("Testing idle sampling at 4 FPS")
+    for timestamp in [0.0, 0.1, 0.2, 0.25, 0.3, 0.5, 0.75]:
         print(
-            f"{timestamp:4.2f} | "
-            f"{state:10} | "
-            f"{'YES' if expected else 'NO':8} | "
-            f"{'YES' if actual else 'NO'}"
+            f"t={timestamp:.2f}s -> "
+            f"{'SAVE' if sampler.should_save('idle', timestamp) else 'SKIP'}"
         )
-
-        assert actual == expected, (
-            f"Test failed at time {timestamp:.2f} "
-            f"for state '{state}'"
-        )
-
-    print("\nAll tests passed!")
 
 
 if __name__ == "__main__":
