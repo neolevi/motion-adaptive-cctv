@@ -1,0 +1,12 @@
+venv/
+__pycache__/
+*.pyc
+.env
+
+# footage and generated data: never commit these
+data/
+recordings/
+*.mp4
+*.avi
+*.db
+*.sqlite
